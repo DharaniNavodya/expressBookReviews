@@ -33,8 +33,7 @@ regd_users.post("/login", (req,res) => {
   req.session.authorization={
     accessToken,username
   };
-  return res.status(200).json({
-    message: "Login successful!"});
+  return res.status(200).json({ message: "Login successful as registered user!"});
 });
 
 // Add a book review
