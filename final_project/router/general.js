@@ -76,21 +76,31 @@ public_users.get("/author/:author", async (req, res) => {
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
-    const title=req.params.title;
-    const keys=Object.keys(books);
-    const matchedBooks=[];
-    keys.forEach((key)=>{
-        if(books[key].title===title){
-            matchedBooks.push({isbn:key, ...books[key]});
-        }
+public_users.get("/title/:title", async (req, res) => {
+  try {
+    const title = req.params.title;
+
+    // Fetch all books using axios (async)
+    const response = await axios.get("http://localhost:5000/");
+    const allBooks = response.data;
+
+    const keys = Object.keys(allBooks);
+    const matchedBooks = [];
+
+    keys.forEach((key) => {
+      if (allBooks[key].title === title) {
+        matchedBooks.push({ isbn: key, ...allBooks[key] });
+      }
     });
-    if(matchedBooks.length>0){
-        return res.status(200).send(JSON.stringify(matchedBooks,null,4));
-    }else{
-        //Write your code here
-        return res.status(404).json({message: "No books found for this title"});
+
+    if (matchedBooks.length > 0) {
+      return res.status(200).send(JSON.stringify(matchedBooks, null, 4));
     }
+
+    return res.status(404).json({ message: "No books found for this title" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error retrieving books by title" });
+  }
 });
 
 //  Get book review
