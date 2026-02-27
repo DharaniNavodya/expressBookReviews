@@ -19,51 +19,47 @@ public_users.post("/register", (req,res) => {
   return res.status(201).json({message: "User successfully registered."});
 });
 
+public_users.get("/booksdata", (req, res) => {
+  return res.status(200).json(books);
+});
+
 // Get the book list available in the shop
-public_users.get('/',async function (req, res) {
-  //Write your code here
-  try{
-    const getBookAsync=()=> new Promise((resolve)=>{resolve(books);
-  });
-  const allBooks=await getBookAsync();
-    return res.status(200).send(JSON.stringify(allBooks,null,4));
-  }catch(err){
-    return res.status(500).json({message:"Error retrieving books"});
-}
+public_users.get("/", async (req, res) => {
+  try {
+    const response = await axios.get("http://localhost:5000/booksdata");
+    return res.status(200).send(JSON.stringify(response.data, null, 4));
+  } catch (error) {
+    return res.status(500).json({ message: "Error retrieving books" });
+  }
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',async function (req, res) {
-    try {
-      const isbn = req.params.isbn;
-      const response = await axios.get("http://localhost:5000/");
-      const allBooks = response.data;
-      if (allBooks && allBooks[isbn]) {
-        return res.status(200).send(JSON.stringify(allBooks[isbn], null, 4));
-      }
-      return res.status(404).json({ message: "Book not found" });
-    } catch (e) {
-      return res.status(500).json({ message: "Error retrieving book by ISBN" });
+public_users.get("/isbn/:isbn", async (req, res) => {
+  try {
+    const isbn = req.params.isbn;
+    const response = await axios.get("http://localhost:5000/booksdata");
+    const allBooks = response.data;
+
+    if (allBooks[isbn]) {
+      return res.status(200).send(JSON.stringify(allBooks[isbn], null, 4));
     }
-  });
+
+    return res.status(404).json({ message: "Book not found" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error retrieving book by ISBN" });
+  }
+});
   
 // Get book details based on author
 public_users.get("/author/:author", async (req, res) => {
   try {
     const author = req.params.author;
-
-    // Get all books first using axios (async)
-    const response = await axios.get("http://localhost:5000/");
+    const response = await axios.get("http://localhost:5000/booksdata");
     const allBooks = response.data;
 
-    const keys = Object.keys(allBooks);
-    const matchedBooks = [];
-
-    keys.forEach((key) => {
-      if (allBooks[key].author === author) {
-        matchedBooks.push({ isbn: key, ...allBooks[key] });
-      }
-    });
+    const matchedBooks = Object.keys(allBooks)
+      .filter(key => allBooks[key].author === author)
+      .map(key => ({ isbn: key, ...allBooks[key] }));
 
     if (matchedBooks.length > 0) {
       return res.status(200).send(JSON.stringify(matchedBooks, null, 4));
@@ -79,19 +75,12 @@ public_users.get("/author/:author", async (req, res) => {
 public_users.get("/title/:title", async (req, res) => {
   try {
     const title = req.params.title;
-
-    // Fetch all books using axios (async)
-    const response = await axios.get("http://localhost:5000/");
+    const response = await axios.get("http://localhost:5000/booksdata");
     const allBooks = response.data;
 
-    const keys = Object.keys(allBooks);
-    const matchedBooks = [];
-
-    keys.forEach((key) => {
-      if (allBooks[key].title === title) {
-        matchedBooks.push({ isbn: key, ...allBooks[key] });
-      }
-    });
+    const matchedBooks = Object.keys(allBooks)
+      .filter(key => allBooks[key].title === title)
+      .map(key => ({ isbn: key, ...allBooks[key] }));
 
     if (matchedBooks.length > 0) {
       return res.status(200).send(JSON.stringify(matchedBooks, null, 4));

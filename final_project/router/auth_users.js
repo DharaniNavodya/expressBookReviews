@@ -34,9 +34,7 @@ regd_users.post("/login", (req,res) => {
     accessToken,username
   };
   return res.status(200).json({
-    message:"Customer successfully logged in",
-    token:accessToken
-  });
+    message: "Login successful!"});
 });
 
 // Add a book review
